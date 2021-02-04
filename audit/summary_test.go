@@ -44,7 +44,7 @@ func TestSummaryState_LogPodName(t *testing.T) {
 	}
 }
 
-// createMockProbe - creates a mock auditstate and probe object in it and returns auditSteate object.
+// createMockProbe - creates a mock SummaryState and probe object in it and returns SummaryState object.
 func createSummaryStateWithMockProbe(probename string) SummaryState {
 	var sumstate SummaryState
 	sumstate.Probes = make(map[string]*Probe)
