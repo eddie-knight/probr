@@ -1,4 +1,4 @@
-package summary
+package audit
 
 import (
 	"fmt"
@@ -44,7 +44,7 @@ func TestSummaryState_LogPodName(t *testing.T) {
 	}
 }
 
-// createMockProbe - creates a mock summarystate and probe object in it and returns summarySteate object.
+// createMockProbe - creates a mock auditstate and probe object in it and returns auditSteate object.
 func createSummaryStateWithMockProbe(probename string) SummaryState {
 	var sumstate SummaryState
 	sumstate.Probes = make(map[string]*Probe)
