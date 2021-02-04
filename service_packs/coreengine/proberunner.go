@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"fmt"
 
-	"github.com/citihub/probr/internal/audit"
+	"github.com/citihub/probr/audit"
 	"github.com/cucumber/godog"
 )
 

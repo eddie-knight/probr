@@ -9,8 +9,8 @@ import (
 	"github.com/briandowns/spinner"
 
 	"github.com/citihub/probr"
+	"github.com/citihub/probr/audit"
 	"github.com/citihub/probr/cmd/cli_flags"
-	"github.com/citihub/probr/internal/audit"
 	"github.com/citihub/probr/internal/config"
 )
 

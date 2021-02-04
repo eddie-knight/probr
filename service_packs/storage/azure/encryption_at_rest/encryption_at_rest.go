@@ -6,7 +6,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/citihub/probr/internal/audit"
+	"github.com/citihub/probr/audit"
 	"github.com/citihub/probr/service_packs/coreengine"
 	"github.com/cucumber/godog"
 )

@@ -1,7 +1,7 @@
 package general
 
 import (
-	"github.com/citihub/probr/internal/audit"
+	"github.com/citihub/probr/audit"
 	"github.com/citihub/probr/service_packs/coreengine"
 	"github.com/citihub/probr/service_packs/kubernetes"
 	"github.com/cucumber/godog"

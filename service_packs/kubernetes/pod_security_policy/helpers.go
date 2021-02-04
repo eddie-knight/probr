@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/citihub/probr/internal/audit"
+	"github.com/citihub/probr/audit"
 	"github.com/citihub/probr/internal/config"
 	"github.com/citihub/probr/internal/utils"
 	"github.com/citihub/probr/service_packs/coreengine"

@@ -3,7 +3,7 @@ package container_registry_access
 import (
 	"strings"
 
-	"github.com/citihub/probr/internal/audit"
+	"github.com/citihub/probr/audit"
 	"github.com/citihub/probr/internal/config"
 	"github.com/citihub/probr/service_packs/coreengine"
 	"github.com/citihub/probr/service_packs/kubernetes"

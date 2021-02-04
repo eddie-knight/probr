@@ -8,7 +8,7 @@ import (
 	"log"
 	"sync"
 
-	"github.com/citihub/probr/internal/audit"
+	"github.com/citihub/probr/audit"
 )
 
 // ProbeStatus type describes the status of the test, e.g. Pending, Running, CompleteSuccess, CompleteFail and Error
