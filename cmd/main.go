@@ -2,68 +2,69 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
-
-	"github.com/briandowns/spinner"
 
 	"github.com/citihub/probr"
 	"github.com/citihub/probr/audit"
 	cliflags "github.com/citihub/probr/cmd/cli_flags"
 	"github.com/citihub/probr/config"
+
+	probrsdk "github.com/citihub/probr/common"
+	"github.com/hashicorp/go-hclog"
+	"github.com/hashicorp/go-plugin"
 )
+
+// Here is a real implementation of Service Pack
+type ServicePack_Probr struct {
+	logger hclog.Logger
+}
+
+func (g *ServicePack_Probr) Greet() string {
+	g.logger.Debug("message from ServicePack_Probr.Greet")
+	//g.logger.Debug("args...", os.Args)
+
+	//return "Hello Probr!"
+	return ProbrCoreLogic(g.logger)
+}
+
+// handshakeConfigs are used to just do a basic handshake between
+// a plugin and host. If the handshake fails, a user friendly error is shown.
+// This prevents users from executing bad plugins or executing a plugin
+// directory. It is a UX feature, not a security feature.
+var handshakeConfig = plugin.HandshakeConfig{
+	ProtocolVersion:  1,
+	MagicCookieKey:   "BASIC_PLUGIN",
+	MagicCookieValue: "probr.servicepack.probr",
+}
 
 func main() {
 
-	// Setup for handling SIGTERM (Ctrl+C)
-	setupCloseHandler()
+	logger := hclog.New(&hclog.LoggerOptions{
+		Level:      hclog.Trace,
+		Output:     os.Stderr,
+		JSONFormat: true,
+	})
 
-	err := config.Init("") // Create default config
-	if err != nil {
-		log.Printf("[ERROR] error returned from config.Init: %v", err)
-		exit(2)
+	spProbr := &ServicePack_Probr{
+		logger: logger,
+	}
+	// pluginMap is the map of plugins we can dispense.
+	var pluginMap = map[string]plugin.Plugin{
+		"spProbr": &probrsdk.ServicePackPlugin{Impl: spProbr},
 	}
 
-	if len(os.Args[1:]) > 0 {
-		log.Printf("[DEBUG] Checking for CLI options or flags")
-		cliflags.HandleRequestForRequiredVars()
-		cliflags.HandlePackOption()
-		// TODO: Find a way to get loglevel handling to work ABOVE this point,
-		// or to move the Options handlers below the flags handler
-		// Currently only ERROR will print prior to HandleFlags()
-		cliflags.HandleFlags()
-	}
+	logger.Debug("message from Probr plugin", "foo", "bar")
 
-	config.Vars.LogConfigState()
+	plugin.Serve(&plugin.ServeConfig{
+		HandshakeConfig: handshakeConfig,
+		Plugins:         pluginMap,
+	})
 
-	if showIndicator() {
-		// At this loglevel, Probr is often silent for long periods. Add a visual runtime indicator.
-		config.Spinner = spinner.New(spinner.CharSets[42], 500*time.Millisecond)
-		config.Spinner.Start()
-	}
+	probr.Logger = &logger
 
-	s, ts, err := probr.RunAllProbes()
-	if err != nil {
-		log.Printf("[ERROR] Error executing tests %v", err)
-		exit(2) // Exit 2+ is for logic/functional errors
-	}
-	log.Printf("[INFO] Overall test completion status: %v", s)
-	audit.State.SetProbrStatus()
-
-	out := probr.GetAllProbeResults(ts)
-	if out == nil || len(out) == 0 {
-		audit.State.Meta["no probes completed"] = fmt.Sprintf(
-			"Probe results not written to file, possibly due to all being excluded or permissions on the specified output directory: %s",
-			config.Vars.CucumberDir(),
-		)
-	}
-	audit.State.PrintSummary()
-	audit.State.WriteSummary()
-
-	exit(s)
+	//ProbrCoreLogic(logger)
 }
 
 // --silent disables, and otherwise only shows on ERROR/WARN
@@ -87,9 +88,63 @@ func setupCloseHandler() {
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-c
-		log.Printf("Execution aborted - %v", "SIGTERM")
+		////log.Printf("Execution aborted - %v", "SIGTERM")
 		probr.CleanupTmp()
 		// TODO: Additional cleanup may be needed. For instance, any pods created during tests are not being dropped if aborted.
 		os.Exit(0)
 	}()
+}
+
+func ProbrCoreLogic(logger hclog.Logger) string {
+	logger.Debug("message from ProbCoreLogic", "Start")
+
+	// Setup for handling SIGTERM (Ctrl+C)
+	//setupCloseHandler()
+
+	err := config.Init("") // Create default config
+	if err != nil {
+		////log.Printf("[ERROR] error returned from config.Init: %v", err)
+		exit(2)
+	}
+	if len(os.Args[1:]) > 0 {
+		////log.Printf("[DEBUG] Checking for CLI options or flags")
+		cliflags.HandleRequestForRequiredVars()
+		////log.Printf("[DEBUG] Handle pack option")
+		cliflags.HandlePackOption()
+		// TODO: Find a way to get loglevel handling to work ABOVE this point,
+		// or to move the Options handlers below the flags handler
+		// Currently only ERROR will print prior to HandleFlags()
+		cliflags.HandleFlags()
+	}
+
+	config.Vars.LogConfigState()
+
+	// if showIndicator() {
+	// 	// At this loglevel, Probr is often silent for long periods. Add a visual runtime indicator.
+	// 	config.Spinner = spinner.New(spinner.CharSets[42], 500*time.Millisecond)
+	// 	config.Spinner.Start()
+	// }
+
+	//s, ts, err := probr.RunAllProbes()
+	_, ts, err := probr.RunAllProbes()
+	if err != nil {
+		//log.Printf("[ERROR] Error executing tests %v", err)
+		exit(2) // Exit 2+ is for logic/functional errors
+	}
+	//log.Printf("[INFO] Overall test completion status: %v", s)
+	audit.State.SetProbrStatus()
+
+	out := probr.GetAllProbeResults(ts)
+	if out == nil || len(out) == 0 {
+		audit.State.Meta["no probes completed"] = fmt.Sprintf(
+			"Probe results not written to file, possibly due to all being excluded or permissions on the specified output directory: %s",
+			config.Vars.CucumberDir(),
+		)
+	}
+	audit.State.PrintSummary()
+	audit.State.WriteSummary()
+
+	logger.Debug("message from ProbCoreLogic", "Complete")
+
+	return "Hello Probr!"
 }

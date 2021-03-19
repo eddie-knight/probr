@@ -13,7 +13,7 @@ require (
 	github.com/briandowns/spinner v1.11.1
 	github.com/cucumber/godog v0.10.0
 	github.com/cucumber/messages-go/v10 v10.0.3
-	github.com/hashicorp/go-hclog v0.15.0 // indirect
+	github.com/hashicorp/go-hclog v0.15.0
 	github.com/hashicorp/go-plugin v1.4.0
 	github.com/hashicorp/logutils v1.0.0
 	github.com/markbates/pkger v0.17.1

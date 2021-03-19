@@ -19,6 +19,10 @@ func main() {
 		Level:  hclog.Debug,
 	})
 
+	// TODO: Load all plugins. Get a collection of probrsdk.ServicePack interface.
+	// 	Defer sp.kill
+	//  Execute sp.Greet() for all
+
 	// Kubernetes *********************************************************
 	// We're a host! Start by launching the plugin process.
 	client_spKubernetes := plugin.NewClient(&plugin.ClientConfig{
@@ -78,6 +82,44 @@ func main() {
 	// Storage*************************************************************
 	// TODO
 	// Storage*************************************************************
+
+	// Probr **************************************************************
+	// We're a host! Start by launching the plugin process.
+	cmd := exec.Command(pluginPath_spProbr)
+	//cmd.SysProcAttr = &syscall.SysProcAttr{}
+	//cmd.SysProcAttr.CmdLine = fmt.Sprintf("%s %s", pluginPath_spProbr, pluginArgs_spProbr)
+	cmd.Args = append(cmd.Args, "--varsfile=config.yml")
+	cmd.Args = append(cmd.Args, "--tags=@k-cra")
+	client_spProbr := plugin.NewClient(&plugin.ClientConfig{
+		HandshakeConfig: handshakeConfig_spProbr,
+		Plugins:         pluginMap_spProbr,
+		Cmd:             cmd,
+		Logger:          logger,
+	})
+	defer client_spProbr.Kill()
+
+	// Connect via RPC
+	rpcClient_spProbr, err := client_spProbr.Client()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Request the plugin
+	raw_spProbr, err := rpcClient_spProbr.Dispense(pluginKeyword_spProbr)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// We should have a ServicePack now! This feels like a normal interface
+	// implementation but is in fact over an RPC connection.
+	spProbr := raw_spProbr.(probrsdk.ServicePack)
+	fmt.Println(spProbr.Greet())
+	// reader := bufio.NewReader(os.Stdin)
+	// fmt.Print("Enter your city: ")
+	// city, _ := reader.ReadString('\n')
+	// fmt.Print("You live in " + city)
+	// fmt.Println(spProbr.Greet())
+	// Probr **************************************************************
 }
 
 // handshakeConfigs are used to just do a basic handshake between
@@ -94,10 +136,16 @@ var handshakeConfig_spAPIM = plugin.HandshakeConfig{
 	MagicCookieKey:   "BASIC_PLUGIN",
 	MagicCookieValue: "probr.servicepack.apim",
 }
+var handshakeConfig_spProbr = plugin.HandshakeConfig{
+	ProtocolVersion:  1,
+	MagicCookieKey:   "BASIC_PLUGIN",
+	MagicCookieValue: "probr.servicepack.probr",
+}
 
 // pluginKeyword is used to identify plugin in pluginmap, and to dispense
 var pluginKeyword_spKubernetes = "spKubernetes"
 var pluginKeyword_spAPIM = "spAPIM"
+var pluginKeyword_spProbr = "spProbr"
 
 // pluginMap is the map of plugins we can dispense.
 var pluginMap_spKubernetes = map[string]plugin.Plugin{
@@ -106,7 +154,12 @@ var pluginMap_spKubernetes = map[string]plugin.Plugin{
 var pluginMap_spAPIM = map[string]plugin.Plugin{
 	pluginKeyword_spAPIM: &probrsdk.ServicePackPlugin{},
 }
+var pluginMap_spProbr = map[string]plugin.Plugin{
+	pluginKeyword_spProbr: &probrsdk.ServicePackPlugin{},
+}
 
 // Location for plugin binaries
 var pluginPath_spKubernetes = "./servicepacks/kubernetes/kubernetes"
 var pluginPath_spAPIM = "./servicepacks/apim/apim"
+var pluginPath_spProbr = "./cmd/probr"
+var pluginArgs_spProbr = "--varsfile=config.yml --tags=@k-gen"
