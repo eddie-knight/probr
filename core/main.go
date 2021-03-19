@@ -89,7 +89,7 @@ func main() {
 	//cmd.SysProcAttr = &syscall.SysProcAttr{}
 	//cmd.SysProcAttr.CmdLine = fmt.Sprintf("%s %s", pluginPath_spProbr, pluginArgs_spProbr)
 	cmd.Args = append(cmd.Args, "--varsfile=config.yml")
-	cmd.Args = append(cmd.Args, "--tags=@k-cra")
+	cmd.Args = append(cmd.Args, "--tags=@k-gen")
 	client_spProbr := plugin.NewClient(&plugin.ClientConfig{
 		HandshakeConfig: handshakeConfig_spProbr,
 		Plugins:         pluginMap_spProbr,
@@ -162,4 +162,3 @@ var pluginMap_spProbr = map[string]plugin.Plugin{
 var pluginPath_spKubernetes = "./servicepacks/kubernetes/kubernetes"
 var pluginPath_spAPIM = "./servicepacks/apim/apim"
 var pluginPath_spProbr = "./cmd/probr"
-var pluginArgs_spProbr = "--varsfile=config.yml --tags=@k-gen"
