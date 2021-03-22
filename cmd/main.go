@@ -11,9 +11,9 @@ import (
 	cliflags "github.com/citihub/probr/cmd/cli_flags"
 	"github.com/citihub/probr/config"
 
-	probrsdk "github.com/citihub/probr/common"
+	"github.com/citihub/probr/plugin"
 	"github.com/hashicorp/go-hclog"
-	"github.com/hashicorp/go-plugin"
+	hcplugin "github.com/hashicorp/go-plugin"
 )
 
 // Here is a real implementation of Service Pack
@@ -30,10 +30,10 @@ func (g *ServicePack_Probr) Greet() string {
 }
 
 // handshakeConfigs are used to just do a basic handshake between
-// a plugin and host. If the handshake fails, a user friendly error is shown.
-// This prevents users from executing bad plugins or executing a plugin
+// a hcplugin and host. If the handshake fails, a user friendly error is shown.
+// This prevents users from executing bad hcplugins or executing a hcplugin
 // directory. It is a UX feature, not a security feature.
-var handshakeConfig = plugin.HandshakeConfig{
+var handshakeConfig = hcplugin.HandshakeConfig{
 	ProtocolVersion:  1,
 	MagicCookieKey:   "BASIC_PLUGIN",
 	MagicCookieValue: "probr.servicepack.probr",
@@ -50,16 +50,16 @@ func main() {
 	spProbr := &ServicePack_Probr{
 		logger: logger,
 	}
-	// pluginMap is the map of plugins we can dispense.
-	var pluginMap = map[string]plugin.Plugin{
-		"spProbr": &probrsdk.ServicePackPlugin{Impl: spProbr},
+	// hcpluginMap is the map of hcplugins we can dispense.
+	var hcpluginMap = map[string]hcplugin.Plugin{
+		"spProbr": &plugin.ServicePackPlugin{Impl: spProbr},
 	}
 
-	logger.Debug("message from Probr plugin", "foo", "bar")
+	logger.Debug("message from Probr hcplugin", "foo", "bar")
 
-	plugin.Serve(&plugin.ServeConfig{
+	hcplugin.Serve(&hcplugin.ServeConfig{
 		HandshakeConfig: handshakeConfig,
-		Plugins:         pluginMap,
+		Plugins:         hcpluginMap,
 	})
 
 	probr.Logger = &logger
