@@ -162,7 +162,7 @@ func (scenario *scenarioState) theResultOfAProcessInsideThePodEstablishingADirec
 	}
 
 	// Create a curl command to access the supplied url and only show http response in stdout.
-	cmd := "curl -s -o /dev/null -I -L -w %{http_code} " + urlAddress
+	cmd := fmt.Sprintf("curl %s", urlAddress)
 
 	stepTrace.WriteString(fmt.Sprintf("Attempt to run command in the pod: '%s'; ", cmd))
 	exitCode, stdOut, _, cmdErr := conn.ExecCommand(cmd, scenario.namespace, scenario.pods[0])
