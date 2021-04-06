@@ -160,8 +160,6 @@ func (scenario *scenarioState) theResultOfAProcessInsideThePodEstablishingADirec
 		err = utils.ReformatError("Unexpected value provided for expected command result: %s", result)
 		return err
 	}
-
-	// Create a curl command to access the supplied url and only show http response in stdout.
 	cmd := fmt.Sprintf("curl %s", urlAddress)
 
 	stepTrace.WriteString(fmt.Sprintf("Attempt to run command in the pod: '%s'; ", cmd))
