@@ -156,7 +156,7 @@ func (scenario *scenarioState) theResultOfAProcessInsideThePodEstablishingADirec
 	expectedCurlExitCodes := []int{6, 28}
 	cmd := fmt.Sprintf("curl -m 10 %s", urlAddress) // 10 second timeout should be enough
 
-	stepTrace.WriteString(fmt.Sprintf("Attempt to run command in the pod; ", cmd))
+	stepTrace.WriteString("Attempt to run curl command in the pod; ")
 	exitCode, stdOut, _, cmdErr := conn.ExecCommand(cmd, scenario.namespace, scenario.pods[0])
 
 	// Validate that no internal error occurred during execution of curl command
