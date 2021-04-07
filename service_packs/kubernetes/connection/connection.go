@@ -159,8 +159,8 @@ func (connection *Conn) DeletePodIfExists(podName, namespace, probeName string) 
 }
 
 // ExecCommand executes the supplied command on the given pod name in the specified namespace.
-func (connection *Conn) ExecCommand(cmd, namespace, podName string) (status int, stdout string, stderr string, err error) {
-	status = -1
+func (connection *Conn) ExecCommand(cmd, namespace, podName string) (exitCode int, stdout string, stderr string, err error) {
+	exitCode = -1
 	if cmd == "" {
 		err = utils.ReformatError("Command string not provided to ExecCommand")
 		return
@@ -209,13 +209,15 @@ func (connection *Conn) ExecCommand(cmd, namespace, podName string) (status int,
 			//the command has been executed on the container, but the underlying command raised an error
 			//this is an 'external' error and represents a successful communication with the cluster
 			err = utils.ReformatError(fmt.Sprintf("err: %s ; stderr: %s", err, stderrBuffer.String()))
-			status = exit.Code
+			exitCode = exit.Code
 			return
 		}
 		// Internal error
 		err = utils.ReformatError("Issue in Stream: %v", err)
 	}
-
+	if strings.Contains(stdout, "command not found") {
+		err = utils.ReformatError("Step failed due to command '%s' not being available within the probe")
+	}
 	return
 }
 
